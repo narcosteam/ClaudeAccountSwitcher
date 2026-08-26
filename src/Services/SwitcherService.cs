@@ -41,18 +41,16 @@ public sealed class SwitcherService(AccountStore accountStore, string credential
         accountStore.SetActiveAccountId(targetAccountId);
     }
 
-    // ponytail: confirmed with user — signing out of the active account just
-    // blanks .credentials.json (Claude Code CLI is left without an active
-    // login until the next switch/login), no revoke-endpoint call.
-    public void SignOut(string accountId)
-    {
-        var wasActive = accountStore.GetActiveAccountId() == accountId;
-        accountStore.RemoveAccount(accountId);
-        if (wasActive)
-        {
-            WriteAtomic(credentialsPath, "{}");
-        }
-    }
+    // ponytail: previously blanked .credentials.json when the removed account
+    // was the switcher's active one — but that file is what the CLI is
+    // actually using right now, independent of whether this app still
+    // tracks that account in its own list. Blanking it force-logged-out a
+    // perfectly live session for no benefit (no revoke-endpoint call either,
+    // so it wasn't even really "signing out" server-side) — a user who
+    // removed every account from the switcher lost their working `claude`
+    // session over it. Sign out only ever touches this app's own bookkeeping
+    // now; the real file is left alone.
+    public void SignOut(string accountId) => accountStore.RemoveAccount(accountId);
 
     private static string? ExtractClaudeAiOauth(string credentialsJson)
     {

@@ -104,7 +104,7 @@ public partial class App : Application
         SetAvailableUpdate(found);
         if (found is null)
         {
-            MessageBox.Show("You're on the latest version.", "Claude Account Switcher", MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageWindow.ShowInfo(_mainWindow, "Claude Account Switcher", "You're on the latest version.");
         }
     }
 
@@ -132,6 +132,7 @@ public partial class App : Application
         // concurrent download/install per click.
         _updateMenuItem.IsEnabled = false;
         _updateMenuItem.Header = "Downloading update...";
+        _mainWindow?.SetBusy(true, "Downloading update...");
         try
         {
             var installerPath = Path.Combine(Path.GetTempPath(), $"ClaudeAccountSwitcherSetup-{update.TagName}.exe");
@@ -151,8 +152,9 @@ public partial class App : Application
         }
         catch (Exception ex) // ponytail: download/launch failure — don't lose the update state, just let the user retry from the tray menu
         {
+            _mainWindow?.SetBusy(false);
             SetAvailableUpdate(update); // restores the clickable "Update to vX..." state
-            MessageBox.Show($"Couldn't download or start the update: {ex.Message}", "Update failed", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageWindow.ShowError(_mainWindow, "Update failed", $"Couldn't download or start the update: {ex.Message}");
         }
     }
 

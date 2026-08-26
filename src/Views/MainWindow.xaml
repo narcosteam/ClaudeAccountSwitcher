@@ -35,5 +35,18 @@
             <TextBlock x:Name="VersionText" Grid.Row="2" FontSize="10" Margin="0,6,0,0"
                        HorizontalAlignment="Center" Foreground="{StaticResource AppMutedForegroundBrush}" />
         </Grid>
+
+        <!-- ponytail: spans both rows (title bar included) so the whole
+             window — not just the account list — is unusable while an
+             update installs; a non-null Background already blocks
+             click-through, no extra IsHitTestVisible wiring needed. -->
+        <Border x:Name="BusyOverlay" Grid.Row="0" Grid.RowSpan="2" Visibility="Collapsed"
+                Background="#CCF6F6F3">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <ProgressBar IsIndeterminate="True" Width="140" Height="4" Margin="0,0,0,10" />
+                <TextBlock x:Name="BusyText" FontSize="11" Foreground="{StaticResource AppMutedForegroundBrush}"
+                           HorizontalAlignment="Center" />
+            </StackPanel>
+        </Border>
     </Grid>
 </Window>

@@ -149,15 +149,18 @@ public class SwitcherServiceTests : IDisposable
     }
 
     [Fact]
-    public void SignOut_ClearsCredentialsFile_WhenSigningOutOfActiveAccount()
+    public void SignOut_LeavesCredentialsFileUntouched_EvenForTheActiveAccount()
     {
+        // The real file is what the CLI is actually using right now — signing
+        // out of the switcher's OWN bookkeeping shouldn't force-logout a
+        // still-live session.
         var id = _store.AddAccount("Personal", new StoredAccount { AccessToken = "t", RefreshToken = "r", ExpiresAt = 0 });
         _switcher.SwitchTo(id);
 
         _switcher.SignOut(id);
 
         using var doc = JsonDocument.Parse(File.ReadAllText(_credentialsPath));
-        Assert.False(doc.RootElement.TryGetProperty("claudeAiOauth", out _));
+        Assert.Equal("t", doc.RootElement.GetProperty("claudeAiOauth").GetProperty("accessToken").GetString());
     }
 
     [Fact]

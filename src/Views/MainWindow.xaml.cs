@@ -33,6 +33,12 @@ public partial class MainWindow : Window
         base.OnClosing(e);
     }
 
+    public void SetBusy(bool busy, string? message = null)
+    {
+        BusyOverlay.Visibility = busy ? Visibility.Visible : Visibility.Collapsed;
+        BusyText.Text = message ?? "";
+    }
+
     public void RefreshAccounts()
     {
         AccountsPanel.Children.Clear();
@@ -207,9 +213,7 @@ public partial class MainWindow : Window
 
     private void SignOut(AccountIndexEntry entry)
     {
-        var confirm = MessageBox.Show(this, $"Remove \"{entry.Label}\" from the switcher?", "Sign out",
-            MessageBoxButton.YesNo, MessageBoxImage.Warning);
-        if (confirm != MessageBoxResult.Yes)
+        if (!MessageWindow.Confirm(this, "Sign out", $"Remove \"{entry.Label}\" from the switcher?", "Remove"))
         {
             return;
         }
@@ -225,7 +229,7 @@ public partial class MainWindow : Window
         }
         catch (Exception ex) // ponytail: SwitchTo can also throw JsonException/IOException, not just InvalidOperationException — catch broadly per design spec's "no crash on write failure"
         {
-            MessageBox.Show(this, ex.Message, "Couldn't switch account", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageWindow.ShowError(this, "Couldn't switch account", ex.Message);
         }
         RefreshAccounts();
     }
@@ -234,9 +238,8 @@ public partial class MainWindow : Window
 
     private void OpenAddAccountWindow()
     {
-        var window = new AddAccountWindow(_app.TokenEndpoint, _app.ProfileClient, _app.AccountStore) { Owner = this };
-        window.Closed += (_, _) => RefreshAccounts();
-        window.Show();
+        new AddAccountWindow(_app.TokenEndpoint, _app.ProfileClient, _app.AccountStore) { Owner = this }.ShowDialog();
+        RefreshAccounts();
     }
 
     private FrameworkElement BuildUsageRow(string windowLabel, RateLimitWindow? window)

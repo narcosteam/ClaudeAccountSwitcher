@@ -4,11 +4,13 @@
         xmlns:local="clr-namespace:ClaudeAccountSwitcher"
         xmlns:Shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
         Title="Add Claude Account" Width="320" Height="252"
-        WindowStartupLocation="CenterScreen" WindowStyle="None" ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner" WindowStyle="None" ResizeMode="NoResize"
+        ShowInTaskbar="False"
         Background="{StaticResource TitleBarBackgroundBrush}">
     <Shell:WindowChrome.WindowChrome>
         <Shell:WindowChrome CaptionHeight="0" GlassFrameThickness="0" CornerRadius="0" />
     </Shell:WindowChrome.WindowChrome>
+    <Border BorderBrush="{StaticResource AppBorderBrush}" BorderThickness="1">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -55,4 +57,5 @@
             </StackPanel>
         </Grid>
     </Grid>
+    </Border>
 </Window>
