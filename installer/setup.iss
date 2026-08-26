@@ -40,4 +40,8 @@ Name: "{userdesktop}\Claude Account Switcher"; Filename: "{app}\ClaudeAccountSwi
 Name: "desktopicon"; Description: "Create a &desktop icon"; GroupDescription: "Additional icons:"; Flags: unchecked
 
 [Run]
-Filename: "{app}\ClaudeAccountSwitcher.exe"; Description: "Launch Claude Account Switcher"; Flags: nowait postinstall skipifsilent
+; ponytail: no skipifsilent — both the first-ever install (install.ps1 runs
+; /VERYSILENT) and every self-triggered auto-update (App.ApplyUpdateAsync,
+; also /VERYSILENT) need this to actually launch the app afterward, not just
+; a manual double-click install.
+Filename: "{app}\ClaudeAccountSwitcher.exe"; Description: "Launch Claude Account Switcher"; Flags: nowait postinstall

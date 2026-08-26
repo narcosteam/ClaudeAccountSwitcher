@@ -79,6 +79,12 @@ public partial class App : Application
         _ = RefreshAllUsageAsync();
         _ = RunUsageRefreshLoopAsync();
         _ = RunUpdateCheckLoopAsync();
+
+        // ponytail: every launch shows the window (fresh install, post-update
+        // relaunch, or a normal run) instead of landing silently in the tray
+        // — there's no autostart-at-login path today where a popup would be
+        // unwelcome; closing it still just hides to tray as usual.
+        ShowMainWindow();
     }
 
     // ponytail: one menu item does double duty — "check now" when nothing's
@@ -121,6 +127,11 @@ public partial class App : Application
 
     private async Task ApplyUpdateAsync(UpdateInfo update)
     {
+        // ponytail: disable immediately — the download can take a while and
+        // without this the menu item was still clickable, spawning another
+        // concurrent download/install per click.
+        _updateMenuItem.IsEnabled = false;
+        _updateMenuItem.Header = "Downloading update...";
         try
         {
             var installerPath = Path.Combine(Path.GetTempPath(), $"ClaudeAccountSwitcherSetup-{update.TagName}.exe");
@@ -140,6 +151,7 @@ public partial class App : Application
         }
         catch (Exception ex) // ponytail: download/launch failure — don't lose the update state, just let the user retry from the tray menu
         {
+            SetAvailableUpdate(update); // restores the clickable "Update to vX..." state
             MessageBox.Show($"Couldn't download or start the update: {ex.Message}", "Update failed", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
