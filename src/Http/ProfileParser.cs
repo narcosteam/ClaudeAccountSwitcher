@@ -20,12 +20,23 @@ public static class ProfileParser
         var email = account.TryGetProperty("email", out var em) ? em.GetString() : null;
         var organizationUuid = organization.TryGetProperty("uuid", out var ou) ? ou.GetString() : null;
         var organizationType = organization.TryGetProperty("organization_type", out var ot) ? ot.GetString() : null;
+        var rateLimitTier = organization.TryGetProperty("rate_limit_tier", out var rlt) ? rlt.GetString() : null;
 
         if (displayName is null || email is null || organizationUuid is null)
         {
             return null;
         }
 
-        return new ProfileInfo(displayName, email, organizationUuid, AccountLabeler.IsTeamAccount(organizationType));
+        return new ProfileInfo(displayName, email, organizationUuid, AccountLabeler.IsTeamAccount(organizationType),
+            SubscriptionType(organizationType), rateLimitTier);
     }
+
+    // ponytail: only the "claude_" prefix strip is live-confirmed (claude_pro
+    // -> pro, matching a real .credentials.json). Passes through unstripped
+    // rather than guessing further if a future organization_type doesn't
+    // have that prefix.
+    private static string? SubscriptionType(string? organizationType) =>
+        organizationType?.StartsWith("claude_", StringComparison.OrdinalIgnoreCase) == true
+            ? organizationType["claude_".Length..]
+            : organizationType;
 }

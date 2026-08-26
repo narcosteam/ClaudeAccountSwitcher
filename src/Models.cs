@@ -67,7 +67,11 @@ public sealed record AccountIndexEntry(
 // DisplayName/Email/OrganizationUuid are the account.display_name/email and
 // organization.uuid fields; IsTeamAccount is derived from
 // organization.organization_type via AccountLabeler, not stored raw.
-public sealed record ProfileInfo(string DisplayName, string Email, string OrganizationUuid, bool IsTeamAccount);
+// RateLimitTier is organization.rate_limit_tier verbatim (same field name
+// Claude Code itself persists into .credentials.json). SubscriptionType is
+// organization.organization_type with its "claude_" prefix stripped — only
+// confirmed live for "claude_pro" -> "pro"; see ProfileParser.
+public sealed record ProfileInfo(string DisplayName, string Email, string OrganizationUuid, bool IsTeamAccount, string? SubscriptionType, string? RateLimitTier);
 
 public sealed record RateLimitWindow(double UsedPercentage, DateTimeOffset? ResetsAt);
 

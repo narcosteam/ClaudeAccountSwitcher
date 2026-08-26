@@ -38,6 +38,22 @@ public partial class AddAccountWindow : Window
                 email = profile.Email;
                 organizationUuid = profile.OrganizationUuid;
                 isTeamAccount = profile.IsTeamAccount;
+
+                // ponytail: this app's own OAuth token exchange never gets
+                // subscriptionType/rateLimitTier (see Models.cs) — but this
+                // profile call, made right here, does. Attach them now so a
+                // fresh sign-in has them from the start instead of relying on
+                // a later SwitchTo to capture them from a real Claude Code
+                // login (see the same class of bug that broke the CLI's
+                // statusline when these were missing).
+                account = new StoredAccount
+                {
+                    AccessToken = account.AccessToken,
+                    RefreshToken = account.RefreshToken,
+                    ExpiresAt = account.ExpiresAt,
+                    SubscriptionType = profile.SubscriptionType,
+                    RateLimitTier = profile.RateLimitTier,
+                };
             }
             else
             {

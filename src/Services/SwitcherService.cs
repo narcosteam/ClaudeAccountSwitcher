@@ -7,13 +7,16 @@ public sealed class SwitcherService(AccountStore accountStore, string credential
 {
     public void SwitchTo(string targetAccountId)
     {
-        var target = accountStore.LoadAccount(targetAccountId)
-            ?? throw new InvalidOperationException($"Account '{targetAccountId}' could not be decrypted; needs re-authorization.");
-
         var currentJson = File.Exists(credentialsPath) ? File.ReadAllText(credentialsPath) : "{}";
 
         // Save whatever is currently in .credentials.json back into the account
-        // we believe is active — Claude Code may have refreshed it while running.
+        // we believe is active — Claude Code may have refreshed it while
+        // running. Must happen BEFORE loading the target below: if
+        // targetAccountId is the account that's already active (re-clicking
+        // its own row), the load needs to see this fresh capture — otherwise
+        // it reads a stale pre-switch snapshot and overwrites the live file
+        // with old tokens, which can be dead if the server already rotated
+        // them (breaks the CLI's auth outright).
         var activeId = accountStore.GetActiveAccountId();
         if (activeId is not null)
         {
@@ -27,6 +30,9 @@ public sealed class SwitcherService(AccountStore accountStore, string credential
                 }
             }
         }
+
+        var target = accountStore.LoadAccount(targetAccountId)
+            ?? throw new InvalidOperationException($"Account '{targetAccountId}' could not be decrypted; needs re-authorization.");
 
         var targetOauthJson = JsonSerializer.Serialize(target, JsonDefaults.CamelCase);
         var merged = CredentialsMerger.MergeClaudeAiOauth(currentJson, targetOauthJson);

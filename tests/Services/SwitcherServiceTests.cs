@@ -97,6 +97,22 @@ public class SwitcherServiceTests : IDisposable
     }
 
     [Fact]
+    public void SwitchTo_ToTheAlreadyActiveAccount_DoesNotRegressToStaleStoredTokens()
+    {
+        // Re-clicking the already-active account's own row (or any repeat
+        // SwitchTo call for it) must be a no-op/sync, never overwrite live,
+        // just-refreshed tokens with an older snapshot from the store.
+        var accountId = _store.AddAccount("Work", new StoredAccount { AccessToken = "stale", RefreshToken = "stale-r", ExpiresAt = 1 });
+        _store.SetActiveAccountId(accountId);
+        File.WriteAllText(_credentialsPath, """{"claudeAiOauth":{"accessToken":"fresh-live","refreshToken":"fresh-live-r","expiresAt":999}}""");
+
+        _switcher.SwitchTo(accountId);
+
+        using var doc = JsonDocument.Parse(File.ReadAllText(_credentialsPath));
+        Assert.Equal("fresh-live", doc.RootElement.GetProperty("claudeAiOauth").GetProperty("accessToken").GetString());
+    }
+
+    [Fact]
     public void SwitchTo_UpdatesActiveAccountId()
     {
         var targetId = _store.AddAccount("Personal", new StoredAccount { AccessToken = "t", RefreshToken = "r", ExpiresAt = 0 });

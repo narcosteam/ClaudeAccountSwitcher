@@ -29,6 +29,22 @@ public class ProfileParserTests
     }
 
     [Fact]
+    public void Parse_ExtractsRateLimitTierVerbatim()
+    {
+        var profile = ProfileParser.Parse(RealShapeJson);
+
+        Assert.Equal("default_claude_ai", profile!.RateLimitTier);
+    }
+
+    [Fact]
+    public void Parse_StripsClaudePrefixFromOrganizationType_ForSubscriptionType()
+    {
+        var profile = ProfileParser.Parse(RealShapeJson);
+
+        Assert.Equal("pro", profile!.SubscriptionType);
+    }
+
+    [Fact]
     public void Parse_SetsIsTeamAccountTrue_ForTeamType()
     {
         const string json = """
