@@ -9,6 +9,11 @@
 AppId={{6C9F0D2E-6B0C-4C9C-9A9E-5B6B8B0E9F2A}}
 AppName=Claude Account Switcher
 AppVersion={#MyAppVersion}
+; ponytail: without this, Inno's default AppVerName folds the version into
+; the Programs-and-Features display name too (e.g. "...Switcher 0.0.1")
+; instead of leaving it in the separate Version column like every other
+; app in that list.
+AppVerName=Claude Account Switcher
 AppPublisher=narcosteam
 DefaultDirName={localappdata}\Programs\ClaudeAccountSwitcher
 DefaultGroupName=Claude Account Switcher

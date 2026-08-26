@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Globalization;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -15,6 +16,8 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         _app = app;
+        var version = Assembly.GetExecutingAssembly().GetName().Version ?? new Version(0, 0, 0);
+        VersionText.Text = $"v{version.Major}.{version.Minor}.{version.Build}";
     }
 
     protected override void OnClosing(CancelEventArgs e)
