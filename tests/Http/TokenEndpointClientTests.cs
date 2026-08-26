@@ -15,7 +15,6 @@ public class TokenEndpointClientTests
 
         Assert.Equal("at1", account.AccessToken);
         Assert.Equal("rt1", account.RefreshToken);
-        Assert.Equal("user:inference", account.Scopes);
     }
 
     [Fact]

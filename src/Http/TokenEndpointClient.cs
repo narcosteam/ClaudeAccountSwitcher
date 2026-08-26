@@ -58,9 +58,10 @@ public sealed class TokenEndpointClient(HttpClient httpClient) : ITokenEndpointC
             AccessToken = body.access_token,
             RefreshToken = body.refresh_token,
             ExpiresAt = DateTimeOffset.UtcNow.AddSeconds(body.expires_in).ToUnixTimeMilliseconds(),
-            Scopes = body.scope,
         };
     }
 
+    // ponytail: "scope" (singular string) from this response is never
+    // consumed — see the no-Scopes-property note on StoredAccount.
     private sealed record TokenResponse(string access_token, string refresh_token, long expires_in, string? scope);
 }

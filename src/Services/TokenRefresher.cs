@@ -27,7 +27,6 @@ public sealed class TokenRefresher(ITokenEndpointClient tokenEndpoint)
             AccessToken = refreshed.AccessToken,
             RefreshToken = refreshed.RefreshToken,
             ExpiresAt = refreshed.ExpiresAt,
-            Scopes = refreshed.Scopes ?? account.Scopes,
             SubscriptionType = account.SubscriptionType,
             RateLimitTier = account.RateLimitTier,
             ExtraFields = account.ExtraFields,

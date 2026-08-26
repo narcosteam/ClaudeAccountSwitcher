@@ -75,6 +75,28 @@ public class SwitcherServiceTests : IDisposable
     }
 
     [Fact]
+    public void SwitchTo_HandlesRealClaudeCodeCredentialsShape_ScopesAsArray()
+    {
+        // Real ~/.claude/.credentials.json (written by the actual Claude Code
+        // CLI, not this app) stores "scopes" as a JSON array — not the
+        // space-separated string this app's own token-endpoint client uses.
+        var accountAId = _store.AddAccount("Work", new StoredAccount { AccessToken = "a-old", RefreshToken = "a-old-r", ExpiresAt = 1 });
+        var accountBId = _store.AddAccount("Personal", new StoredAccount { AccessToken = "b-token", RefreshToken = "b-r", ExpiresAt = 2 });
+        _store.SetActiveAccountId(accountAId);
+
+        File.WriteAllText(_credentialsPath, """
+            {"claudeAiOauth":{"accessToken":"a-real","refreshToken":"a-real-r","expiresAt":123,
+            "scopes":["user:profile","user:inference"],"subscriptionType":"pro","rateLimitTier":"default_claude_ai"}}
+            """);
+
+        _switcher.SwitchTo(accountBId);
+
+        var savedA = _store.LoadAccount(accountAId);
+        Assert.Equal("a-real", savedA!.AccessToken);
+        Assert.Equal("pro", savedA.SubscriptionType);
+    }
+
+    [Fact]
     public void SwitchTo_UpdatesActiveAccountId()
     {
         var targetId = _store.AddAccount("Personal", new StoredAccount { AccessToken = "t", RefreshToken = "r", ExpiresAt = 0 });

@@ -31,7 +31,16 @@ public sealed class StoredAccount
     // .credentials.json value (Task 13 manual verification).
     public required long ExpiresAt { get; init; }
 
-    public string? Scopes { get; init; }
+    // ponytail: no typed Scopes property on purpose — this app's own OAuth
+    // exchange gets a singular space-separated "scope" string (never read
+    // back, never displayed), but the real ~/.claude/.credentials.json
+    // written by Claude Code itself stores "scopes" as a JSON ARRAY. A typed
+    // `string? Scopes` property collided with that shape: deserializing the
+    // real file's claudeAiOauth block (done every switch, to preserve
+    // whatever Claude Code last wrote) threw JsonException on the array,
+    // silently failing every switch once the app had one. Letting
+    // ExtraFields catch "scopes" generically round-trips it correctly
+    // regardless of shape, same as any other field we don't need to read.
     public string? SubscriptionType { get; init; }
     public string? RateLimitTier { get; init; }
 
