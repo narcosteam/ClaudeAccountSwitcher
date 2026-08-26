@@ -1,0 +1,124 @@
+<Application x:Class="ClaudeAccountSwitcher.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:tb="clr-namespace:H.NotifyIcon;assembly=H.NotifyIcon.Wpf"
+             ShutdownMode="OnExplicitShutdown">
+    <Application.Resources>
+        <tb:TaskbarIcon x:Key="TrayIcon" ToolTipText="Claude Account Switcher" />
+
+        <!-- Quiet-luxury palette: cool stone / charcoal / muted sage.
+             No pure black or pure white anywhere in the app. -->
+        <SolidColorBrush x:Key="AppBackgroundBrush" Color="#F6F6F3" />
+        <SolidColorBrush x:Key="AppForegroundBrush" Color="#26261F" />
+        <SolidColorBrush x:Key="AppMutedForegroundBrush" Color="#78786D" />
+        <SolidColorBrush x:Key="AppBorderBrush" Color="#E1E1D8" />
+        <SolidColorBrush x:Key="BarTrackBrush" Color="#E9E9E0" />
+        <SolidColorBrush x:Key="BarFillNormalBrush" Color="#6B7360" />
+        <SolidColorBrush x:Key="BarFillWarningBrush" Color="#9C7A45" />
+
+        <!-- Main window additions (2026-08-25 redesign): elevated cards on
+             the same base palette, not a new direction. -->
+        <SolidColorBrush x:Key="RowBackgroundBrush" Color="#FDFDFB" />
+        <SolidColorBrush x:Key="RowBorderBrush" Color="#E5E5DB" />
+        <SolidColorBrush x:Key="TitleBarBackgroundBrush" Color="#EFEFE7" />
+        <SolidColorBrush x:Key="AvatarBackgroundBrush" Color="#4C5A43" />
+        <SolidColorBrush x:Key="BadgePersonalBackgroundBrush" Color="#E7ECE3" />
+        <SolidColorBrush x:Key="BadgePersonalForegroundBrush" Color="#5C6E52" />
+        <SolidColorBrush x:Key="BadgeTeamBackgroundBrush" Color="#E3E6EC" />
+        <SolidColorBrush x:Key="BadgeTeamForegroundBrush" Color="#4C5A78" />
+        <SolidColorBrush x:Key="IconButtonHoverBrush" Color="#ECECE2" />
+        <SolidColorBrush x:Key="PrimaryButtonHoverBrush" Color="#3A3A2E" />
+        <SolidColorBrush x:Key="PrimaryButtonPressedBrush" Color="#1C1C16" />
+
+        <!-- Rounded, soft-edged buttons — plain WPF Button/TextBox render as
+             sharp rectangles, which reads as "angular" against the rest of
+             this app's rounded cards/badges/avatars. -->
+        <Style x:Key="PrimaryButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource AppForegroundBrush}" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="0,10" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bg" Background="{TemplateBinding Background}" CornerRadius="8">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bg" Property="Background" Value="{StaticResource PrimaryButtonHoverBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bg" Property="Background" Value="{StaticResource PrimaryButtonPressedBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SecondaryButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource RowBackgroundBrush}" />
+            <Setter Property="Foreground" Value="{StaticResource AppForegroundBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource RowBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="12,6" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bg" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="8">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bg" Property="Background" Value="{StaticResource IconButtonHoverBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="IconButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Foreground" Value="{StaticResource AppMutedForegroundBrush}" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Bg" Background="{TemplateBinding Background}" CornerRadius="6">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bg" Property="Background" Value="{StaticResource IconButtonHoverBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="RoundedTextBoxStyle" TargetType="TextBox">
+            <Setter Property="Background" Value="{StaticResource RowBackgroundBrush}" />
+            <Setter Property="Foreground" Value="{StaticResource AppForegroundBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource RowBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="8,6" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6">
+                            <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}" VerticalAlignment="Center" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Application.Resources>
+</Application>

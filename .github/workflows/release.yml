@@ -1,0 +1,68 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - '*.*.*'
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - name: Validate tag
+        id: tag
+        shell: bash
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          if [[ "$TAG" =~ ^([0-9]+\.[0-9]+\.[0-9]+)(-pre)?$ ]]; then
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+            echo "version=${BASH_REMATCH[1]}" >> "$GITHUB_OUTPUT"
+            if [[ -n "${BASH_REMATCH[2]}" ]]; then
+              echo "prerelease=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "prerelease=false" >> "$GITHUB_OUTPUT"
+            fi
+          else
+            echo "Tag '$TAG' is not a version tag (expected x.x.x or x.x.x-pre) — skipping release."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Checkout
+        if: steps.tag.outputs.skip != 'true'
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        if: steps.tag.outputs.skip != 'true'
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Publish self-contained win-x64
+        if: steps.tag.outputs.skip != 'true'
+        run: >
+          dotnet publish src/ClaudeAccountSwitcher.csproj
+          -c Release -r win-x64 --self-contained true
+          -p:Version=${{ steps.tag.outputs.version }}
+          -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
+          -o publish
+
+      - name: Install Inno Setup
+        if: steps.tag.outputs.skip != 'true'
+        run: choco install innosetup --no-progress -y
+
+      - name: Build installer
+        if: steps.tag.outputs.skip != 'true'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force dist | Out-Null
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "/DMyAppVersion=${{ steps.tag.outputs.version }}" installer\setup.iss
+
+      - name: Publish GitHub release
+        if: steps.tag.outputs.skip != 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          prerelease: ${{ steps.tag.outputs.prerelease }}
+          files: dist/ClaudeAccountSwitcherSetup.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

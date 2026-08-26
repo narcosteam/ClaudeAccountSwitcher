@@ -1,0 +1,35 @@
+<Window x:Class="ClaudeAccountSwitcher.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:ClaudeAccountSwitcher"
+        xmlns:Shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
+        Title="Claude Account Switcher" Width="360" Height="440" MinWidth="320" MinHeight="240"
+        WindowStartupLocation="CenterScreen" WindowStyle="None" ResizeMode="CanResize"
+        Icon="/Resources/app.ico"
+        Background="{StaticResource TitleBarBackgroundBrush}">
+    <Shell:WindowChrome.WindowChrome>
+        <Shell:WindowChrome CaptionHeight="0" ResizeBorderThickness="5" GlassFrameThickness="0" CornerRadius="0" />
+    </Shell:WindowChrome.WindowChrome>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <local:ThemedTitleBar Grid.Row="0" Title="Claude Account Switcher" ShowMinimize="True" />
+
+        <Grid Grid.Row="1" Margin="14">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" Margin="0,0,0,10">
+                <StackPanel x:Name="AccountsPanel" />
+            </ScrollViewer>
+
+            <Button x:Name="AddAccountButton" Grid.Row="1" Content="+ Add Account" Click="AddAccountButton_Click"
+                    Style="{StaticResource PrimaryButtonStyle}" />
+        </Grid>
+    </Grid>
+</Window>
