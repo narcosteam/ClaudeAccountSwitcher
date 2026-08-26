@@ -11,7 +11,7 @@ public sealed class ProfileClient(HttpClient httpClient)
     {
         using var request = new HttpRequestMessage(HttpMethod.Get, ProfileUrl);
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-        // ponytail: same required headers as UsageClient — see its comment.
+        // Same required headers as UsageClient.
         request.Headers.Add("anthropic-beta", "oauth-2025-04-20");
         request.Headers.Add("User-Agent", "claude-code/1.0.0");
 

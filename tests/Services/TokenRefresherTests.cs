@@ -39,10 +39,7 @@ public class TokenRefresherTests
     [Fact]
     public async Task EnsureFreshAsync_PreservesSubscriptionFields_AcrossRefresh()
     {
-        // The real refresh_token grant response never includes subscriptionType/
-        // rateLimitTier/extension fields (confirmed by TokenEndpointClientTests
-        // .RefreshAsync_ParsesTokenResponse) — losing them here is the same bug
-        // that broke the CLI's statusline before (see Models.cs).
+        // Real refresh responses never include subscriptionType/rateLimitTier/extension fields.
         var stub = new StubTokenEndpointClient { RefreshResult = new StoredAccount { AccessToken = "new", RefreshToken = "new-r", ExpiresAt = 0 } };
         var refresher = new TokenRefresher(stub);
         var account = new StoredAccount

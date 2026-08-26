@@ -6,10 +6,7 @@ public sealed class UpdateChecker(HttpClient httpClient, Version currentVersion)
 {
     private const string LatestReleaseUrl = "https://api.github.com/repos/narcosteam/ClaudeAccountSwitcher/releases/latest";
 
-    // ponytail: returns null both when there's no newer release AND when the
-    // check itself fails (network down, API rate-limited, no installer asset
-    // attached) — callers don't need to distinguish "up to date" from
-    // "couldn't tell", they just don't nag the user either way.
+    // Null means both "no update" and "check failed" — callers don't need to tell them apart.
     public async Task<UpdateInfo?> CheckForUpdateAsync(CancellationToken ct)
     {
         try
@@ -32,7 +29,7 @@ public sealed class UpdateChecker(HttpClient httpClient, Version currentVersion)
 
             return latestVersion > currentVersion ? update : null;
         }
-        catch (Exception) // ponytail: transient network/parse failure — same as UsageClient's "leave it, try again next cycle"
+        catch (Exception)
         {
             return null;
         }

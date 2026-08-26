@@ -22,9 +22,7 @@ public partial class MainWindow : Window
 
     protected override void OnClosing(CancelEventArgs e)
     {
-        // ponytail: tray app — X minimizes to tray like the rest of this
-        // app's windows-as-tray-icon peers (eve-o-preview etc.), it doesn't
-        // quit. Only the tray's own Exit sets IsExiting first.
+        // Tray app: X hides instead of quitting; only tray Exit sets IsExiting first.
         if (!_app.IsExiting)
         {
             e.Cancel = true;
@@ -227,7 +225,7 @@ public partial class MainWindow : Window
         {
             _app.Switcher.SwitchTo(accountId);
         }
-        catch (Exception ex) // ponytail: SwitchTo can also throw JsonException/IOException, not just InvalidOperationException — catch broadly per design spec's "no crash on write failure"
+        catch (Exception ex) // SwitchTo can throw JsonException/IOException too, not just InvalidOperationException
         {
             MessageWindow.ShowError(this, "Couldn't switch account", ex.Message);
         }
@@ -306,8 +304,7 @@ public partial class MainWindow : Window
                 ? "resetting..."
                 : $"resets in {(int)remaining.TotalHours}h {remaining.Minutes}m";
         }
-        // ponytail: fixed to InvariantCulture — with the OS locale, "MMM d"
-        // rendered as "авг. 29" on a Russian-locale Windows install.
+        // InvariantCulture — the OS locale rendered "MMM d" as "авг. 29" on Russian Windows.
         return $"resets {resetsAt.Value.LocalDateTime.ToString("MMM d", CultureInfo.InvariantCulture)}";
     }
 }

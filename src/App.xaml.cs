@@ -25,9 +25,7 @@ public partial class App : Application
     private readonly Dictionary<string, UsageInfo?> _usageCache = new();
     private UpdateInfo? _availableUpdate;
 
-    // ponytail: distinguishes "user clicked X on the main window" (hide to
-    // tray) from "tray Exit was clicked" (actually quit) — MainWindow checks
-    // this in its Closing handler.
+    // True only when the tray's Exit was clicked, vs. closing the window (hides to tray).
     internal bool IsExiting { get; private set; }
 
     internal AccountStore AccountStore => _accountStore;
@@ -74,22 +72,16 @@ public partial class App : Application
         _trayIcon.ContextMenu = menu;
         _trayIcon.TrayLeftMouseDoubleClick += (_, _) => ShowMainWindow();
 
-        _trayIcon.ForceCreate(); // icon lives in Application.Resources, not a window, so it needs a manual create
+        _trayIcon.ForceCreate(); // lives in Application.Resources, not a window — needs a manual create
 
         _ = RefreshAllUsageAsync();
         _ = RunUsageRefreshLoopAsync();
         _ = RunUpdateCheckLoopAsync();
 
-        // ponytail: every launch shows the window (fresh install, post-update
-        // relaunch, or a normal run) instead of landing silently in the tray
-        // — there's no autostart-at-login path today where a popup would be
-        // unwelcome; closing it still just hides to tray as usual.
         ShowMainWindow();
     }
 
-    // ponytail: one menu item does double duty — "check now" when nothing's
-    // pending, "install what I already found" once a check has succeeded.
-    // Two buttons for one action just makes the menu longer.
+    // Doubles as "check now" and "install what was found" to avoid two menu items.
     private async Task UpdateMenuItem_ClickAsync()
     {
         if (_availableUpdate is { } update)
@@ -127,9 +119,7 @@ public partial class App : Application
 
     private async Task ApplyUpdateAsync(UpdateInfo update)
     {
-        // ponytail: disable immediately — the download can take a while and
-        // without this the menu item was still clickable, spawning another
-        // concurrent download/install per click.
+        // Disable immediately so repeated clicks can't start concurrent downloads.
         _updateMenuItem.IsEnabled = false;
         _updateMenuItem.Header = "Downloading update...";
         _mainWindow?.SetBusy(true, "Downloading update...");
@@ -140,9 +130,7 @@ public partial class App : Application
             var bytes = await httpClient.GetByteArrayAsync(update.InstallerUrl);
             await File.WriteAllBytesAsync(installerPath, bytes);
 
-            // ponytail: installer overwrites files this running process has
-            // open, so it must launch detached and outlive us — spawn it,
-            // then exit for real (not hide-to-tray) so the file locks clear.
+            // Launch detached and exit for real — the installer overwrites our own files.
             Process.Start(new ProcessStartInfo(installerPath, "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART")
             {
                 UseShellExecute = true,
@@ -150,7 +138,7 @@ public partial class App : Application
             IsExiting = true;
             Shutdown();
         }
-        catch (Exception ex) // ponytail: download/launch failure — don't lose the update state, just let the user retry from the tray menu
+        catch (Exception ex)
         {
             _mainWindow?.SetBusy(false);
             SetAvailableUpdate(update); // restores the clickable "Update to vX..." state
@@ -200,15 +188,12 @@ public partial class App : Application
                     UpdateTrayIcon();
                 }
             }
-            catch (Exception) // ponytail: transient network/parse failure — leave usage unavailable, don't mark as needing reauth
+            catch (Exception)
             {
                 _usageCache[entry.Id] = null;
             }
         }
 
-        // ponytail: window is a singleton kept alive via Hide()/Show(), so a
-        // simple "if visible, repaint" after each tick is enough to keep it
-        // live — no pub/sub event plumbing needed for one subscriber.
         if (_mainWindow?.IsVisible == true)
         {
             _mainWindow.RefreshAccounts();
@@ -247,15 +232,11 @@ public partial class App : Application
         var dotRect = new Rectangle(bitmap.Width - dotSize, bitmap.Height - dotSize, dotSize, dotSize);
         graphics.FillEllipse(System.Drawing.Brushes.White, dotRect);
         var innerRect = Rectangle.Inflate(dotRect, -dotSize / 8, -dotSize / 8);
-        using var warningBrush = new SolidBrush(System.Drawing.Color.FromArgb(255, 0x9C, 0x7A, 0x45)); // matches BarFillWarningBrush — quiet, not alarming
+        using var warningBrush = new SolidBrush(System.Drawing.Color.FromArgb(255, 0x9C, 0x7A, 0x45)); // matches BarFillWarningBrush
         graphics.FillEllipse(warningBrush, innerRect);
 
-        // ponytail: Icon.FromHandle wraps a native HICON that technically
-        // leaks if never destroyed via the Win32 DestroyIcon call —
-        // acceptable here since this only runs when the reauth set flips
-        // between empty and non-empty, at most a handful of times per
-        // session. Add a DestroyIcon P/Invoke wrapper if this ever runs on a
-        // hot path.
+        // Icon.FromHandle leaks the native HICON without a DestroyIcon call —
+        // fine here, runs only a handful of times per session.
         return Icon.FromHandle(bitmap.GetHicon());
     }
 }

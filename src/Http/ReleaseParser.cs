@@ -4,9 +4,7 @@ namespace ClaudeAccountSwitcher;
 
 public sealed record UpdateInfo(string TagName, string InstallerUrl);
 
-// ponytail: shape is GitHub's /repos/{owner}/{repo}/releases/latest response —
-// this endpoint already excludes pre-releases, so every tag_name we see here
-// is a plain "x.y.z" stable version.
+// GitHub's /releases/latest already excludes pre-releases.
 public static class ReleaseParser
 {
     public static UpdateInfo? Parse(string json)

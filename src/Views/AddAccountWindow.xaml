@@ -10,7 +10,7 @@
     <Shell:WindowChrome.WindowChrome>
         <Shell:WindowChrome CaptionHeight="0" GlassFrameThickness="0" CornerRadius="0" />
     </Shell:WindowChrome.WindowChrome>
-    <Border BorderBrush="{StaticResource AppBorderBrush}" BorderThickness="1">
+    <Border BorderBrush="{StaticResource AppForegroundBrush}" BorderThickness="2">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />

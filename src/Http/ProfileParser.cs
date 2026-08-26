@@ -2,8 +2,7 @@ using System.Text.Json;
 
 namespace ClaudeAccountSwitcher;
 
-// ponytail: shape confirmed against a live /api/oauth/profile response —
-// see ProfileParserTests for the captured example.
+// Shape confirmed against a live /api/oauth/profile response — see ProfileParserTests.
 public static class ProfileParser
 {
     public static ProfileInfo? Parse(string json)
@@ -31,10 +30,7 @@ public static class ProfileParser
             SubscriptionType(organizationType), rateLimitTier);
     }
 
-    // ponytail: only the "claude_" prefix strip is live-confirmed (claude_pro
-    // -> pro, matching a real .credentials.json). Passes through unstripped
-    // rather than guessing further if a future organization_type doesn't
-    // have that prefix.
+    // Only the "claude_" prefix strip is confirmed (claude_pro -> pro); passes through otherwise.
     private static string? SubscriptionType(string? organizationType) =>
         organizationType?.StartsWith("claude_", StringComparison.OrdinalIgnoreCase) == true
             ? organizationType["claude_".Length..]

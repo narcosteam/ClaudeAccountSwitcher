@@ -6,8 +6,6 @@
     <Application.Resources>
         <tb:TaskbarIcon x:Key="TrayIcon" ToolTipText="Claude Account Switcher" />
 
-        <!-- Quiet-luxury palette: cool stone / charcoal / muted sage.
-             No pure black or pure white anywhere in the app. -->
         <SolidColorBrush x:Key="AppBackgroundBrush" Color="#F6F6F3" />
         <SolidColorBrush x:Key="AppForegroundBrush" Color="#26261F" />
         <SolidColorBrush x:Key="AppMutedForegroundBrush" Color="#78786D" />
@@ -16,8 +14,6 @@
         <SolidColorBrush x:Key="BarFillNormalBrush" Color="#6B7360" />
         <SolidColorBrush x:Key="BarFillWarningBrush" Color="#9C7A45" />
 
-        <!-- Main window additions (2026-08-25 redesign): elevated cards on
-             the same base palette, not a new direction. -->
         <SolidColorBrush x:Key="RowBackgroundBrush" Color="#FDFDFB" />
         <SolidColorBrush x:Key="RowBorderBrush" Color="#E5E5DB" />
         <SolidColorBrush x:Key="TitleBarBackgroundBrush" Color="#EFEFE7" />
@@ -30,9 +26,6 @@
         <SolidColorBrush x:Key="PrimaryButtonHoverBrush" Color="#3A3A2E" />
         <SolidColorBrush x:Key="PrimaryButtonPressedBrush" Color="#1C1C16" />
 
-        <!-- Rounded, soft-edged buttons — plain WPF Button/TextBox render as
-             sharp rectangles, which reads as "angular" against the rest of
-             this app's rounded cards/badges/avatars. -->
         <Style x:Key="PrimaryButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="{StaticResource AppForegroundBrush}" />
             <Setter Property="Foreground" Value="White" />
@@ -103,9 +96,7 @@
             </Setter>
         </Style>
 
-        <!-- Un-keyed so every ContextMenu/MenuItem in the app (tray menu, row
-             "⋯" menu) picks this up automatically instead of the default
-             plain-white Windows menu chrome. -->
+        <!-- Un-keyed: applies to every ContextMenu/MenuItem automatically. -->
         <Style TargetType="ContextMenu">
             <Setter Property="Background" Value="{StaticResource RowBackgroundBrush}" />
             <Setter Property="BorderBrush" Value="{StaticResource AppBorderBrush}" />

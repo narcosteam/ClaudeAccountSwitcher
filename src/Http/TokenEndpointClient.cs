@@ -9,11 +9,8 @@ public sealed class TokenEndpointClient(HttpClient httpClient) : ITokenEndpointC
     private const string TokenUrl = "https://console.anthropic.com/v1/oauth/token";
     private const string ClientId = "9d1c250a-e61b-44d9-88ed-5944d1962f5e";
 
+    // The server requires "state" echoed back here too, despite it not being part of the OAuth2 spec.
     public Task<StoredAccount> ExchangeCodeAsync(string code, string state, string codeVerifier, string redirectUri, CancellationToken ct) =>
-        // ponytail: the real token endpoint returned 400 Bad Request without
-        // "state" in the exchange body — even though it's not part of the
-        // OAuth 2.0 authorization_code grant spec, the real server expects
-        // it echoed back here alongside code/code_verifier.
         PostAsync(new Dictionary<string, string>
         {
             ["grant_type"] = "authorization_code",
@@ -37,11 +34,8 @@ public sealed class TokenEndpointClient(HttpClient httpClient) : ITokenEndpointC
         using var response = await httpClient.PostAsJsonAsync(TokenUrl, payload, ct);
         if (!response.IsSuccessStatusCode)
         {
-            // ponytail: a refresh_token grant rejected with 400/401 means the
-            // refresh token itself is dead (revoked, expired past its own
-            // lifetime, or issued to a different client) — OAuth2's
-            // invalid_grant. Distinguish this from a transient network/server
-            // error so callers can tell "sign in again" apart from "try later".
+            // 400/401 on a refresh grant means the token itself is dead (invalid_grant),
+            // distinct from a transient network/server error.
             if (payload["grant_type"] == "refresh_token" &&
                 (response.StatusCode == HttpStatusCode.BadRequest || response.StatusCode == HttpStatusCode.Unauthorized))
             {
@@ -61,7 +55,6 @@ public sealed class TokenEndpointClient(HttpClient httpClient) : ITokenEndpointC
         };
     }
 
-    // ponytail: "scope" (singular string) from this response is never
-    // consumed — see the no-Scopes-property note on StoredAccount.
+    // "scope" from this response is never consumed — see StoredAccount.
     private sealed record TokenResponse(string access_token, string refresh_token, long expires_in, string? scope);
 }

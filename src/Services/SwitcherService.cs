@@ -9,14 +9,9 @@ public sealed class SwitcherService(AccountStore accountStore, string credential
     {
         var currentJson = File.Exists(credentialsPath) ? File.ReadAllText(credentialsPath) : "{}";
 
-        // Save whatever is currently in .credentials.json back into the account
-        // we believe is active — Claude Code may have refreshed it while
-        // running. Must happen BEFORE loading the target below: if
-        // targetAccountId is the account that's already active (re-clicking
-        // its own row), the load needs to see this fresh capture — otherwise
-        // it reads a stale pre-switch snapshot and overwrites the live file
-        // with old tokens, which can be dead if the server already rotated
-        // them (breaks the CLI's auth outright).
+        // Capture the live file into the active account BEFORE loading the
+        // target: switching to the already-active account must see this
+        // fresh capture, not a stale pre-switch snapshot.
         var activeId = accountStore.GetActiveAccountId();
         if (activeId is not null)
         {
@@ -41,16 +36,23 @@ public sealed class SwitcherService(AccountStore accountStore, string credential
         accountStore.SetActiveAccountId(targetAccountId);
     }
 
-    // ponytail: previously blanked .credentials.json when the removed account
-    // was the switcher's active one — but that file is what the CLI is
-    // actually using right now, independent of whether this app still
-    // tracks that account in its own list. Blanking it force-logged-out a
-    // perfectly live session for no benefit (no revoke-endpoint call either,
-    // so it wasn't even really "signing out" server-side) — a user who
-    // removed every account from the switcher lost their working `claude`
-    // session over it. Sign out only ever touches this app's own bookkeeping
-    // now; the real file is left alone.
-    public void SignOut(string accountId) => accountStore.RemoveAccount(accountId);
+    // Never blanks .credentials.json — only switches to another account (if
+    // one remains) when the removed account was active; no revoke call.
+    public void SignOut(string accountId)
+    {
+        var wasActive = accountStore.GetActiveAccountId() == accountId;
+        accountStore.RemoveAccount(accountId);
+        if (!wasActive)
+        {
+            return;
+        }
+
+        var remaining = accountStore.ListAccounts();
+        if (remaining.Count > 0)
+        {
+            SwitchTo(remaining[0].Id);
+        }
+    }
 
     private static string? ExtractClaudeAiOauth(string credentialsJson)
     {

@@ -62,8 +62,6 @@ public class SwitcherServiceTests : IDisposable
         var accountBId = _store.AddAccount("Personal", new StoredAccount { AccessToken = "b-token", RefreshToken = "b-r", ExpiresAt = 2 });
         _store.SetActiveAccountId(accountAId);
 
-        // Simulates a real claudeAiOauth block containing a field this app's
-        // StoredAccount doesn't have an explicit property for.
         File.WriteAllText(_credentialsPath, """{"claudeAiOauth":{"accessToken":"a-refreshed","refreshToken":"a-refreshed-r","expiresAt":123,"someFutureField":"keep-me"}}""");
 
         _switcher.SwitchTo(accountBId);
@@ -77,9 +75,7 @@ public class SwitcherServiceTests : IDisposable
     [Fact]
     public void SwitchTo_HandlesRealClaudeCodeCredentialsShape_ScopesAsArray()
     {
-        // Real ~/.claude/.credentials.json (written by the actual Claude Code
-        // CLI, not this app) stores "scopes" as a JSON array — not the
-        // space-separated string this app's own token-endpoint client uses.
+        // Real .credentials.json stores "scopes" as a JSON array, not a space-separated string.
         var accountAId = _store.AddAccount("Work", new StoredAccount { AccessToken = "a-old", RefreshToken = "a-old-r", ExpiresAt = 1 });
         var accountBId = _store.AddAccount("Personal", new StoredAccount { AccessToken = "b-token", RefreshToken = "b-r", ExpiresAt = 2 });
         _store.SetActiveAccountId(accountAId);
@@ -99,9 +95,7 @@ public class SwitcherServiceTests : IDisposable
     [Fact]
     public void SwitchTo_ToTheAlreadyActiveAccount_DoesNotRegressToStaleStoredTokens()
     {
-        // Re-clicking the already-active account's own row (or any repeat
-        // SwitchTo call for it) must be a no-op/sync, never overwrite live,
-        // just-refreshed tokens with an older snapshot from the store.
+        // Must be a no-op/sync — never overwrite live, just-refreshed tokens with a stale snapshot.
         var accountId = _store.AddAccount("Work", new StoredAccount { AccessToken = "stale", RefreshToken = "stale-r", ExpiresAt = 1 });
         _store.SetActiveAccountId(accountId);
         File.WriteAllText(_credentialsPath, """{"claudeAiOauth":{"accessToken":"fresh-live","refreshToken":"fresh-live-r","expiresAt":999}}""");
@@ -149,11 +143,8 @@ public class SwitcherServiceTests : IDisposable
     }
 
     [Fact]
-    public void SignOut_LeavesCredentialsFileUntouched_EvenForTheActiveAccount()
+    public void SignOut_LeavesCredentialsFileUntouched_WhenNoAccountsRemain()
     {
-        // The real file is what the CLI is actually using right now — signing
-        // out of the switcher's OWN bookkeeping shouldn't force-logout a
-        // still-live session.
         var id = _store.AddAccount("Personal", new StoredAccount { AccessToken = "t", RefreshToken = "r", ExpiresAt = 0 });
         _switcher.SwitchTo(id);
 
@@ -161,6 +152,20 @@ public class SwitcherServiceTests : IDisposable
 
         using var doc = JsonDocument.Parse(File.ReadAllText(_credentialsPath));
         Assert.Equal("t", doc.RootElement.GetProperty("claudeAiOauth").GetProperty("accessToken").GetString());
+    }
+
+    [Fact]
+    public void SignOut_SwitchesToFirstRemainingAccount_WhenTheActiveAccountIsRemoved()
+    {
+        var accountAId = _store.AddAccount("Work", new StoredAccount { AccessToken = "a", RefreshToken = "a-r", ExpiresAt = 0 });
+        var accountBId = _store.AddAccount("Personal", new StoredAccount { AccessToken = "b", RefreshToken = "b-r", ExpiresAt = 0 });
+        _switcher.SwitchTo(accountAId);
+
+        _switcher.SignOut(accountAId);
+
+        Assert.Equal(accountBId, _store.GetActiveAccountId());
+        using var doc = JsonDocument.Parse(File.ReadAllText(_credentialsPath));
+        Assert.Equal("b", doc.RootElement.GetProperty("claudeAiOauth").GetProperty("accessToken").GetString());
     }
 
     [Fact]

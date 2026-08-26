@@ -13,11 +13,7 @@ public static class Pkce
         return Base64UrlEncode(hash);
     }
 
-    // ponytail: 32 bytes (43-char base64url), not 16 — a state shorter than
-    // what the real server expects gets rejected as "Invalid request format"
-    // before the user even sees the consent screen's Authorize action take
-    // effect. Confirmed against a live-captured working state value's length
-    // and an independent OAuth client bug report requiring exactly this size.
+    // 32 bytes, not 16 — a shorter state gets rejected by the real server.
     public static string GenerateState() => Base64UrlEncode(RandomNumberGenerator.GetBytes(32));
 
     private static string Base64UrlEncode(byte[] bytes) =>

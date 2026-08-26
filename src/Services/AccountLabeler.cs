@@ -1,9 +1,6 @@
 namespace ClaudeAccountSwitcher;
 
-// ponytail: heuristic based on the one live-confirmed value ("claude_pro" ->
-// personal). team/enterprise organization_type values are NOT verified live
-// — guessed from Anthropic's public plan naming. Revisit this substring list
-// if a team/enterprise account is ever tested against it.
+// Only "claude_pro" is live-confirmed; team/enterprise values are guessed.
 public static class AccountLabeler
 {
     public static bool IsTeamAccount(string? organizationType) =>

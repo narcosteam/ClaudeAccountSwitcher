@@ -3,10 +3,7 @@ using System.Text.Json;
 
 namespace ClaudeAccountSwitcher;
 
-// ponytail: real shape confirmed against the live /api/oauth/usage response —
-// five_hour/seven_day sit at the ROOT (not under a "rate_limits" wrapper) and
-// carry "utilization" (not "used_percentage"). The original guess based on
-// statusline field names was wrong on both counts.
+// five_hour/seven_day sit at the root (not under "rate_limits") and carry "utilization".
 public static class UsageParser
 {
     public static UsageInfo Parse(string json)

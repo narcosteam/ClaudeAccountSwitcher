@@ -2,10 +2,7 @@ using System.Windows;
 
 namespace ClaudeAccountSwitcher;
 
-// ponytail: replaces MessageBox.Show everywhere in this app — the native
-// Windows dialog looked completely out of place next to the custom-styled
-// UI. One window, two shapes (info/error = OK only, confirm = Cancel + a
-// labeled action button) covers every call site this app has.
+// Replaces MessageBox.Show — matches the app's own styling instead of the native dialog.
 public partial class MessageWindow : Window
 {
     private bool _confirmed;

@@ -8,8 +8,7 @@ public class UsageParserTests
     [Fact]
     public void Parse_ReadsFiveHourAndSevenDayWindows()
     {
-        // Shape captured from the real /api/oauth/usage response: windows at
-        // the root, "utilization" rather than "used_percentage".
+        // Real shape: windows at the root, "utilization" rather than "used_percentage".
         const string json = """
         {"five_hour":{"utilization":42.5,"resets_at":"2026-08-23T22:00:00Z"},"seven_day":{"utilization":10,"resets_at":"2026-08-29T00:00:00Z"},"seven_day_opus":null,"extra_usage":{"is_enabled":false}}
         """;

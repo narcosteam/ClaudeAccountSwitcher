@@ -5,8 +5,7 @@ namespace ClaudeAccountSwitcher.Tests;
 
 public class ReleaseParserTests
 {
-    // ponytail: shape is GitHub's real /releases/latest response, trimmed to
-    // the fields we read.
+    // GitHub's real /releases/latest response, trimmed to the fields we read.
     private const string RealShapeJson = """
     {"tag_name":"1.3.0","name":"1.3.0","prerelease":false,"assets":[{"name":"ClaudeAccountSwitcherSetup.exe","browser_download_url":"https://github.com/narcosteam/ClaudeAccountSwitcher/releases/download/1.3.0/ClaudeAccountSwitcherSetup.exe"}]}
     """;

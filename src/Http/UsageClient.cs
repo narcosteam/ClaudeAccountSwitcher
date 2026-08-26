@@ -23,17 +23,14 @@ public sealed class UsageClient(HttpClient httpClient, TokenRefresher tokenRefre
 
         using var request = new HttpRequestMessage(HttpMethod.Get, UsageUrl);
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", fresh.AccessToken);
-        // ponytail: both headers are required. Without anthropic-beta the
-        // endpoint rejects the OAuth token outright; without a claude-code
-        // User-Agent it drops the caller into an aggressively rate-limited
-        // bucket that returns persistent 429s even at slow poll rates.
+        // Both headers required — without anthropic-beta the token is rejected outright,
+        // without a claude-code User-Agent it gets rate-limited hard.
         request.Headers.Add("anthropic-beta", "oauth-2025-04-20");
         request.Headers.Add("User-Agent", "claude-code/1.0.0");
 
         using var response = await httpClient.SendAsync(request, ct);
         if (!response.IsSuccessStatusCode)
         {
-            // ponytail: caller (tray menu) just shows "limits unavailable" — no retry loop.
             return null;
         }
 

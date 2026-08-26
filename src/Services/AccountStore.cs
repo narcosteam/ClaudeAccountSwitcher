@@ -94,8 +94,7 @@ public sealed class AccountStore
         }
         catch (CryptographicException)
         {
-            // ponytail: different Windows profile/user than the one that
-            // encrypted this — caller treats a null return as "needs re-auth".
+            // Different Windows profile than the one that encrypted this — caller treats null as needs-reauth.
             return null;
         }
 

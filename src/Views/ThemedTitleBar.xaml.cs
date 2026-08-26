@@ -4,10 +4,7 @@ using System.Windows.Input;
 
 namespace ClaudeAccountSwitcher;
 
-// ponytail: WindowStyle="None" gives us a blank canvas, so we own the
-// drag/minimize/close chrome ourselves instead of fighting the OS title bar's
-// colors. Shared across MainWindow/AddAccountWindow/RenameAccountWindow so
-// the drag+button plumbing lives in exactly one place.
+// WindowStyle="None" means we own drag/minimize/close ourselves; shared across all windows.
 public partial class ThemedTitleBar : UserControl
 {
     public static readonly DependencyProperty TitleProperty =

@@ -36,10 +36,7 @@
                        HorizontalAlignment="Center" Foreground="{StaticResource AppMutedForegroundBrush}" />
         </Grid>
 
-        <!-- ponytail: spans both rows (title bar included) so the whole
-             window — not just the account list — is unusable while an
-             update installs; a non-null Background already blocks
-             click-through, no extra IsHitTestVisible wiring needed. -->
+        <!-- Spans both rows so the whole window, not just the list, is blocked while updating. -->
         <Border x:Name="BusyOverlay" Grid.Row="0" Grid.RowSpan="2" Visibility="Collapsed"
                 Background="#CCF6F6F3">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">

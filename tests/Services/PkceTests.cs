@@ -38,10 +38,7 @@ public class PkceTests
     [Fact]
     public void GenerateState_Produces43CharState_MatchingRealServerExpectation()
     {
-        // A shorter state (e.g. 16 random bytes / 22 chars) got "Invalid
-        // request format" from the real claude.ai OAuth server — confirmed
-        // by comparing against a live-captured working authorize request's
-        // state length (32 random bytes / 43 chars, base64url).
+        // A shorter state got "Invalid request format" from the real claude.ai OAuth server.
         var state = Pkce.GenerateState();
 
         Assert.Equal(43, state.Length);

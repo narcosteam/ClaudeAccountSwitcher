@@ -39,13 +39,7 @@ public partial class AddAccountWindow : Window
                 organizationUuid = profile.OrganizationUuid;
                 isTeamAccount = profile.IsTeamAccount;
 
-                // ponytail: this app's own OAuth token exchange never gets
-                // subscriptionType/rateLimitTier (see Models.cs) — but this
-                // profile call, made right here, does. Attach them now so a
-                // fresh sign-in has them from the start instead of relying on
-                // a later SwitchTo to capture them from a real Claude Code
-                // login (see the same class of bug that broke the CLI's
-                // statusline when these were missing).
+                // The OAuth exchange never returns subscriptionType/rateLimitTier; this profile call does.
                 account = new StoredAccount
                 {
                     AccessToken = account.AccessToken,
@@ -57,10 +51,7 @@ public partial class AddAccountWindow : Window
             }
             else
             {
-                // ponytail: profile lookup failed (network/unexpected shape) but
-                // the OAuth token itself is valid — don't block adding the
-                // account over a display-name nicety. Generate a numbered
-                // placeholder; the user can rename it later from the tray menu.
+                // Profile lookup failed but the token's still valid — don't block adding the account.
                 displayName = $"Account {_accountStore.ListAccounts().Count + 1}";
                 email = null;
                 organizationUuid = null;
@@ -70,11 +61,6 @@ public partial class AddAccountWindow : Window
             var existing = organizationUuid is not null ? _accountStore.FindByOrganizationUuid(organizationUuid) : null;
             if (existing is not null)
             {
-                // ponytail: this also naturally clears any "needs
-                // re-authorization" tray state for this account — the next
-                // background refresh tick (within 60s) will succeed against
-                // this fresh token and remove it from the reauth set itself,
-                // no extra cross-window wiring needed here.
                 _accountStore.SaveAccount(existing.Id, account);
                 ShowDone(existing.Label, existing.IsTeamAccount, "Tokens refreshed");
             }

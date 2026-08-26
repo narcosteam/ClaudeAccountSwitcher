@@ -16,12 +16,8 @@ public sealed class TokenRefresher(ITokenEndpointClient tokenEndpoint)
 
         var refreshed = await tokenEndpoint.RefreshAsync(account.RefreshToken, ct);
 
-        // ponytail: the refresh_token grant response never carries
-        // subscriptionType/rateLimitTier/extension fields (confirmed live —
-        // see TokenEndpointClientTests), so a fresh StoredAccount built from
-        // it alone is missing them. Carry them forward from the account being
-        // refreshed — the same fields whose absence already broke the CLI's
-        // statusline once (see Models.cs).
+        // The refresh response never carries subscriptionType/rateLimitTier/extension
+        // fields — keep them from the account being refreshed.
         return new StoredAccount
         {
             AccessToken = refreshed.AccessToken,

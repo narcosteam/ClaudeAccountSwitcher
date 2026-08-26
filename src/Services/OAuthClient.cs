@@ -10,10 +10,8 @@ public sealed class OAuthClient(ITokenEndpointClient tokenEndpoint)
 {
     private const string AuthorizeUrl = "https://claude.ai/oauth/authorize";
     private const string ClientId = "9d1c250a-e61b-44d9-88ed-5944d1962f5e";
-    // ponytail: captured verbatim from a real `claude /login` request (DevTools
-    // network tab) — code=true and this exact scope set are both required;
-    // a narrower scope or missing code=true got "Invalid request format" from
-    // the real server, confirmed by direct A/B testing against the CLI's own URL.
+    // code=true and this exact scope set are both required — a narrower scope
+    // or missing code=true gets "Invalid request format" from the real server.
     private const string Scope = "org:create_api_key user:profile user:inference user:sessions:claude_code user:mcp_servers user:file_upload";
     private static readonly TimeSpan LoginTimeout = TimeSpan.FromMinutes(5);
 
@@ -27,18 +25,8 @@ public sealed class OAuthClient(ITokenEndpointClient tokenEndpoint)
         var codeChallenge = Pkce.ComputeCodeChallenge(codeVerifier);
         var state = Pkce.GenerateState();
 
-        // ponytail: HttpListener repeatedly threw "Cannot access a disposed
-        // object: ThreadPoolBoundHandle" starting on the second login attempt
-        // within the same running process, even on a fast, non-timed-out
-        // login — its native HTTP.sys request queue handle behaves as if
-        // shared/process-wide, so one attempt's Stop() poisons the next
-        // attempt's GetContextAsync(), regardless of cancellation timing.
-        // A raw TcpListener sidesteps that whole subsystem: no HTTP.sys, no
-        // shared native queue, and TcpListener.AcceptTcpClientAsync(token)
-        // supports cancellation natively (no WaitAsync/Register workaround
-        // needed). We only need to read one request line + headers and write
-        // one static response, so hand-parsing that here is simpler and more
-        // robust than depending on HttpListener's machinery for it.
+        // TcpListener, not HttpListener — HttpListener's native HTTP.sys queue is
+        // shared process-wide and throws on a second login attempt in the same run.
         using var listener = new TcpListener(IPAddress.Loopback, 0);
         listener.Start();
         var port = ((IPEndPoint)listener.LocalEndpoint).Port;
@@ -85,9 +73,7 @@ public sealed class OAuthClient(ITokenEndpointClient tokenEndpoint)
         // "GET /callback?code=...&state=... HTTP/1.1"
         var requestLine = await reader.ReadLineAsync(ct) ?? "";
 
-        // Drain the remaining request headers up to the blank line — we
-        // don't need them, but leaving them unread on the socket before
-        // writing a response can confuse some browsers' connection handling.
+        // Drain remaining headers — unread data before writing the response can confuse some browsers.
         string? line;
         while (!string.IsNullOrEmpty(line = await reader.ReadLineAsync(ct)))
         {
