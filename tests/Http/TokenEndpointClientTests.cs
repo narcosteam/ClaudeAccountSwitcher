@@ -18,6 +18,20 @@ public class TokenEndpointClientTests
     }
 
     [Fact]
+    public async Task ExchangeCodeAsync_ConvertsSpaceSeparatedScopeIntoScopesArray()
+    {
+        // Real .credentials.json stores "scopes" as an array; Claude Code treats a
+        // missing "scopes" array as not-logged-in even with a valid accessToken.
+        var handler = new FakeHttpMessageHandler("""{"access_token":"at1","refresh_token":"rt1","expires_in":3600,"scope":"user:profile user:inference"}""");
+        var client = new TokenEndpointClient(new HttpClient(handler));
+
+        var account = await client.ExchangeCodeAsync("code123", "state123", "verifier123", "http://localhost:5000/callback/", CancellationToken.None);
+
+        var scopes = account.ExtraFields!["scopes"].EnumerateArray().Select(e => e.GetString()!).ToArray();
+        Assert.Equal(["user:profile", "user:inference"], scopes);
+    }
+
+    [Fact]
     public async Task RefreshAsync_ParsesTokenResponse()
     {
         var handler = new FakeHttpMessageHandler("""{"access_token":"at2","refresh_token":"rt2","expires_in":3600}""");

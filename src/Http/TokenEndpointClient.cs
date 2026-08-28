@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
+using System.Text.Json;
 
 namespace ClaudeAccountSwitcher;
 
@@ -52,9 +53,24 @@ public sealed class TokenEndpointClient(HttpClient httpClient) : ITokenEndpointC
             AccessToken = body.access_token,
             RefreshToken = body.refresh_token,
             ExpiresAt = DateTimeOffset.UtcNow.AddSeconds(body.expires_in).ToUnixTimeMilliseconds(),
+            ExtraFields = ScopesExtraField(body.scope),
         };
     }
 
-    // "scope" from this response is never consumed — see StoredAccount.
+    // The real .credentials.json stores granted scopes as a "scopes" array; this
+    // endpoint returns them as one space-separated "scope" string. Converting and
+    // keeping them (via ExtraFields) matters: SwitcherService writes this StoredAccount
+    // straight into the live file, and Claude Code treats a missing "scopes" array as
+    // not-logged-in even when accessToken/refreshToken are otherwise valid.
+    private static Dictionary<string, JsonElement>? ScopesExtraField(string? scope)
+    {
+        if (string.IsNullOrWhiteSpace(scope))
+        {
+            return null;
+        }
+        var scopes = scope.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        return new Dictionary<string, JsonElement> { ["scopes"] = JsonSerializer.SerializeToElement(scopes) };
+    }
+
     private sealed record TokenResponse(string access_token, string refresh_token, long expires_in, string? scope);
 }

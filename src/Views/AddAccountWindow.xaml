@@ -8,9 +8,9 @@
         ShowInTaskbar="False"
         Background="{StaticResource TitleBarBackgroundBrush}">
     <Shell:WindowChrome.WindowChrome>
-        <Shell:WindowChrome CaptionHeight="0" GlassFrameThickness="0" CornerRadius="0" />
+        <Shell:WindowChrome CaptionHeight="0" GlassFrameThickness="0" CornerRadius="8" />
     </Shell:WindowChrome.WindowChrome>
-    <Border BorderBrush="{StaticResource AppForegroundBrush}" BorderThickness="2">
+    <Border BorderBrush="{StaticResource AppForegroundBrush}" BorderThickness="2" CornerRadius="8">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />

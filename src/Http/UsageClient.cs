@@ -21,8 +21,19 @@ public sealed class UsageClient(HttpClient httpClient, TokenRefresher tokenRefre
             accountStore.SaveAccount(accountId, fresh);
         }
 
+        return await FetchAsync(fresh.AccessToken, ct);
+    }
+
+    // For the active account: call with the access token read straight off the live
+    // credentials file (SwitcherService.ReadLiveAccount) instead of routing through
+    // AccountStore/TokenRefresher — see ReadLiveAccount for why.
+    public Task<UsageInfo?> GetUsageForLiveTokenAsync(string accessToken, CancellationToken ct) =>
+        FetchAsync(accessToken, ct);
+
+    private async Task<UsageInfo?> FetchAsync(string accessToken, CancellationToken ct)
+    {
         using var request = new HttpRequestMessage(HttpMethod.Get, UsageUrl);
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", fresh.AccessToken);
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
         // Both headers required — without anthropic-beta the token is rejected outright,
         // without a claude-code User-Agent it gets rate-limited hard.
         request.Headers.Add("anthropic-beta", "oauth-2025-04-20");

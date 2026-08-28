@@ -238,6 +238,8 @@ public partial class MainWindow : Window
     {
         new AddAccountWindow(_app.TokenEndpoint, _app.ProfileClient, _app.AccountStore) { Owner = this }.ShowDialog();
         RefreshAccounts();
+        // Don't make the new row wait for the next per-minute usage tick.
+        _ = _app.RefreshAllUsageAsync();
     }
 
     private FrameworkElement BuildUsageRow(string windowLabel, RateLimitWindow? window)

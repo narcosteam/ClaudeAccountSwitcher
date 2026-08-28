@@ -168,13 +168,16 @@ public partial class App : Application
         }
     }
 
-    private async Task RefreshAllUsageAsync()
+    internal async Task RefreshAllUsageAsync()
     {
+        var activeId = _accountStore.GetActiveAccountId();
         foreach (var entry in _accountStore.ListAccounts())
         {
             try
             {
-                _usageCache[entry.Id] = await _usageClient.GetUsageAsync(entry.Id, CancellationToken.None);
+                _usageCache[entry.Id] = entry.Id == activeId
+                    ? await GetActiveUsageAsync(entry.Id, CancellationToken.None)
+                    : await _usageClient.GetUsageAsync(entry.Id, CancellationToken.None);
                 if (_accountsNeedingReauth.Remove(entry.Id))
                 {
                     UpdateTrayIcon();
@@ -198,6 +201,17 @@ public partial class App : Application
         {
             _mainWindow.RefreshAccounts();
         }
+    }
+
+    // See SwitcherService.ReadLiveAccount: the active account's token lives in the
+    // live credentials file, owned by Claude Code itself, not in the AccountStore
+    // snapshot (which only syncs on SwitchTo).
+    private async Task<UsageInfo?> GetActiveUsageAsync(string accountId, CancellationToken ct)
+    {
+        var live = _switcher.ReadLiveAccount();
+        return live is not null
+            ? await _usageClient.GetUsageForLiveTokenAsync(live.AccessToken, ct)
+            : await _usageClient.GetUsageAsync(accountId, ct);
     }
 
     private const int TrayIconSize = 64;

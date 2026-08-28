@@ -1,3 +1,5 @@
+using System.Text.Json;
+
 namespace ClaudeAccountSwitcher;
 
 public sealed class TokenRefresher(ITokenEndpointClient tokenEndpoint)
@@ -16,8 +18,10 @@ public sealed class TokenRefresher(ITokenEndpointClient tokenEndpoint)
 
         var refreshed = await tokenEndpoint.RefreshAsync(account.RefreshToken, ct);
 
-        // The refresh response never carries subscriptionType/rateLimitTier/extension
-        // fields — keep them from the account being refreshed.
+        // The refresh response never carries subscriptionType/rateLimitTier — keep those
+        // from the account being refreshed. It does carry "scopes" though (see
+        // TokenEndpointClient); merge rather than discard so an account whose stored
+        // snapshot is missing it (e.g. added before that was fixed) self-heals here.
         return new StoredAccount
         {
             AccessToken = refreshed.AccessToken,
@@ -25,7 +29,22 @@ public sealed class TokenRefresher(ITokenEndpointClient tokenEndpoint)
             ExpiresAt = refreshed.ExpiresAt,
             SubscriptionType = account.SubscriptionType,
             RateLimitTier = account.RateLimitTier,
-            ExtraFields = account.ExtraFields,
+            ExtraFields = MergeExtraFields(account.ExtraFields, refreshed.ExtraFields),
         };
+    }
+
+    private static Dictionary<string, JsonElement>? MergeExtraFields(
+        Dictionary<string, JsonElement>? previous, Dictionary<string, JsonElement>? fromRefresh)
+    {
+        if (fromRefresh is null || fromRefresh.Count == 0)
+        {
+            return previous;
+        }
+        var merged = previous is null ? [] : new Dictionary<string, JsonElement>(previous);
+        foreach (var (key, value) in fromRefresh)
+        {
+            merged[key] = value;
+        }
+        return merged;
     }
 }

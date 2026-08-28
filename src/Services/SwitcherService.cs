@@ -54,6 +54,22 @@ public sealed class SwitcherService(AccountStore accountStore, string credential
         }
     }
 
+    // Reads the live credentials file's claudeAiOauth block directly, bypassing
+    // AccountStore. Used for the active account: its stored snapshot only gets synced
+    // on SwitchTo, so it goes stale while Claude Code itself refreshes the live file
+    // between switches — refreshing that stale snapshot independently would race
+    // Claude Code's own refresh and can revoke the live session (rotating refresh
+    // tokens are single-use).
+    public StoredAccount? ReadLiveAccount()
+    {
+        if (!File.Exists(credentialsPath))
+        {
+            return null;
+        }
+        var oauthJson = ExtractClaudeAiOauth(File.ReadAllText(credentialsPath));
+        return oauthJson is null ? null : JsonSerializer.Deserialize<StoredAccount>(oauthJson, JsonDefaults.CamelCase);
+    }
+
     private static string? ExtractClaudeAiOauth(string credentialsJson)
     {
         using var doc = JsonDocument.Parse(credentialsJson);

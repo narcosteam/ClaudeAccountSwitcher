@@ -47,6 +47,7 @@ public partial class AddAccountWindow : Window
                     ExpiresAt = account.ExpiresAt,
                     SubscriptionType = profile.SubscriptionType,
                     RateLimitTier = profile.RateLimitTier,
+                    ExtraFields = account.ExtraFields,
                 };
             }
             else
