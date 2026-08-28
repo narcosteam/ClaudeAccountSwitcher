@@ -36,6 +36,12 @@
                        HorizontalAlignment="Center" Foreground="{StaticResource AppMutedForegroundBrush}" />
         </Grid>
 
+        <!-- Dims the window behind an owned dialog (Add/Rename/Sign out confirm) — those
+             dialogs share this window's own cream background, so without a scrim they
+             visually blend into it instead of reading as a separate surface on top. -->
+        <Border x:Name="DialogScrim" Grid.Row="0" Grid.RowSpan="2" Visibility="Collapsed"
+                Background="#5C1C1C16" />
+
         <!-- Spans both rows so the whole window, not just the list, is blocked while updating. -->
         <Border x:Name="BusyOverlay" Grid.Row="0" Grid.RowSpan="2" Visibility="Collapsed"
                 Background="#CCF6F6F3">

@@ -8,11 +8,15 @@
 
         <SolidColorBrush x:Key="AppBackgroundBrush" Color="#F6F6F3" />
         <SolidColorBrush x:Key="AppForegroundBrush" Color="#26261F" />
-        <SolidColorBrush x:Key="AppMutedForegroundBrush" Color="#78786D" />
+        <!-- Was #78786D — under 4:1 contrast on this app's light backgrounds (fails WCAG AA
+             for the small-caps labels this brush is used for everywhere). Darkened, same hue. -->
+        <SolidColorBrush x:Key="AppMutedForegroundBrush" Color="#57574C" />
         <SolidColorBrush x:Key="AppBorderBrush" Color="#E1E1D8" />
         <SolidColorBrush x:Key="BarTrackBrush" Color="#E9E9E0" />
         <SolidColorBrush x:Key="BarFillNormalBrush" Color="#6B7360" />
-        <SolidColorBrush x:Key="BarFillWarningBrush" Color="#9C7A45" />
+        <!-- Was #9C7A45 — under 4:1 contrast as the "Needs re-authorization" text color;
+             darkened, same hue (also the fill/tray-dot color, keep App.xaml.cs's copy in sync). -->
+        <SolidColorBrush x:Key="BarFillWarningBrush" Color="#8A6435" />
 
         <SolidColorBrush x:Key="RowBackgroundBrush" Color="#FDFDFB" />
         <SolidColorBrush x:Key="RowBorderBrush" Color="#E5E5DB" />

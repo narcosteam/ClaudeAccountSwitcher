@@ -246,7 +246,7 @@ public partial class App : Application
         var dotRect = new Rectangle(bitmap.Width - dotSize, bitmap.Height - dotSize, dotSize, dotSize);
         graphics.FillEllipse(System.Drawing.Brushes.White, dotRect);
         var innerRect = Rectangle.Inflate(dotRect, -dotSize / 8, -dotSize / 8);
-        using var warningBrush = new SolidBrush(System.Drawing.Color.FromArgb(255, 0x9C, 0x7A, 0x45)); // matches BarFillWarningBrush
+        using var warningBrush = new SolidBrush(System.Drawing.Color.FromArgb(255, 0x8A, 0x64, 0x35)); // matches BarFillWarningBrush
         graphics.FillEllipse(warningBrush, innerRect);
 
         // Icon.FromHandle leaks the native HICON without a DestroyIcon call —

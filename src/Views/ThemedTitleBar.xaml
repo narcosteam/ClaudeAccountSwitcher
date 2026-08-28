@@ -4,6 +4,7 @@
              x:Name="Root" Height="32">
     <Border Background="{StaticResource TitleBarBackgroundBrush}"
             BorderBrush="{StaticResource RowBorderBrush}" BorderThickness="0,0,0,1"
+            CornerRadius="{Binding CornerRadius, ElementName=Root}"
             MouseLeftButtonDown="Border_MouseLeftButtonDown">
         <Grid>
             <Grid.ColumnDefinitions>

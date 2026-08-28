@@ -31,6 +31,22 @@ public partial class MainWindow : Window
         base.OnClosing(e);
     }
 
+    // Wraps a Window.ShowDialog()/MessageWindow.Confirm() call with the dimmed-backdrop
+    // scrim (see DialogScrim in MainWindow.xaml) so owned dialogs read as a separate
+    // surface instead of blending into this window's own matching background.
+    private T ShowScrimmed<T>(Func<T> showDialog)
+    {
+        DialogScrim.Visibility = Visibility.Visible;
+        try
+        {
+            return showDialog();
+        }
+        finally
+        {
+            DialogScrim.Visibility = Visibility.Collapsed;
+        }
+    }
+
     public void SetBusy(bool busy, string? message = null)
     {
         BusyOverlay.Visibility = busy ? Visibility.Visible : Visibility.Collapsed;
@@ -168,7 +184,7 @@ public partial class MainWindow : Window
         renameButton.Click += (_, e) =>
         {
             e.Handled = true;
-            new RenameAccountWindow(_app.AccountStore, entry.Id, entry.Label) { Owner = this }.ShowDialog();
+            ShowScrimmed(() => new RenameAccountWindow(_app.AccountStore, entry.Id, entry.Label) { Owner = this }.ShowDialog());
             RefreshAccounts();
         };
         Grid.SetColumn(renameButton, 2);
@@ -211,7 +227,7 @@ public partial class MainWindow : Window
 
     private void SignOut(AccountIndexEntry entry)
     {
-        if (!MessageWindow.Confirm(this, "Sign out", $"Remove \"{entry.Label}\" from the switcher?", "Remove"))
+        if (!ShowScrimmed(() => MessageWindow.Confirm(this, "Sign out", $"Remove \"{entry.Label}\" from the switcher?", "Remove")))
         {
             return;
         }
@@ -236,7 +252,7 @@ public partial class MainWindow : Window
 
     private void OpenAddAccountWindow()
     {
-        new AddAccountWindow(_app.TokenEndpoint, _app.ProfileClient, _app.AccountStore) { Owner = this }.ShowDialog();
+        ShowScrimmed(() => new AddAccountWindow(_app.TokenEndpoint, _app.ProfileClient, _app.AccountStore) { Owner = this }.ShowDialog());
         RefreshAccounts();
         // Don't make the new row wait for the next per-minute usage tick.
         _ = _app.RefreshAllUsageAsync();

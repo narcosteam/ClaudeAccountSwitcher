@@ -16,6 +16,18 @@ public partial class ThemedTitleBar : UserControl
         set => SetValue(TitleProperty, value);
     }
 
+    // Default 0 (square) matches MainWindow, which has no rounded outer border of its own.
+    // Dialogs wrapped in a rounded Border set this to match it — otherwise this control's
+    // own square top corners paint over (and cut into) that Border's rounded top stroke.
+    public static readonly DependencyProperty CornerRadiusProperty =
+        DependencyProperty.Register(nameof(CornerRadius), typeof(CornerRadius), typeof(ThemedTitleBar), new PropertyMetadata(new CornerRadius(0)));
+
+    public CornerRadius CornerRadius
+    {
+        get => (CornerRadius)GetValue(CornerRadiusProperty);
+        set => SetValue(CornerRadiusProperty, value);
+    }
+
     public bool ShowMinimize
     {
         set => MinimizeButton.Visibility = value ? Visibility.Visible : Visibility.Collapsed;

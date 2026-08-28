@@ -3,23 +3,29 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:ClaudeAccountSwitcher"
         xmlns:Shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
-        Title="Add Claude Account" Width="320" Height="252"
+        Title="Add Claude Account" Width="352" SizeToContent="Height"
         WindowStartupLocation="CenterOwner" WindowStyle="None" ResizeMode="NoResize"
-        ShowInTaskbar="False"
-        Background="{StaticResource TitleBarBackgroundBrush}">
+        ShowInTaskbar="False" AllowsTransparency="True"
+        Background="Transparent">
     <Shell:WindowChrome.WindowChrome>
-        <Shell:WindowChrome CaptionHeight="0" GlassFrameThickness="0" CornerRadius="8" />
+        <Shell:WindowChrome CaptionHeight="0" GlassFrameThickness="0" CornerRadius="0" />
     </Shell:WindowChrome.WindowChrome>
-    <Border BorderBrush="{StaticResource AppForegroundBrush}" BorderThickness="2" CornerRadius="8">
+    <!-- Margin leaves room, inside the transparent window, for the drop shadow to fall off into —
+         otherwise it'd get clipped at the window edge and the dialog would still blend into
+         whatever's behind it (the owner window is the same background color). -->
+    <Border Margin="16" Background="{StaticResource TitleBarBackgroundBrush}" BorderBrush="{StaticResource AppForegroundBrush}" BorderThickness="2" CornerRadius="8">
+    <Border.Effect>
+        <DropShadowEffect Color="Black" Opacity="0.3" BlurRadius="24" ShadowDepth="6" Direction="270" />
+    </Border.Effect>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <local:ThemedTitleBar Grid.Row="0" Title="Add Claude Account" />
+        <local:ThemedTitleBar Grid.Row="0" Title="Add Claude Account" CornerRadius="6,6,0,0" />
 
-        <Grid Grid.Row="1" Margin="20" Background="{StaticResource AppBackgroundBrush}">
+        <Grid Grid.Row="1" Margin="20">
             <StackPanel x:Name="IdlePanel" VerticalAlignment="Center">
                 <TextBlock Text="ADD CLAUDE ACCOUNT" FontSize="11" Foreground="{StaticResource AppMutedForegroundBrush}"
                            HorizontalAlignment="Center" Margin="0,0,0,18" />

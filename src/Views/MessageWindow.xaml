@@ -3,21 +3,24 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:ClaudeAccountSwitcher"
         xmlns:Shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
-        Title="Claude Account Switcher" Width="320" SizeToContent="Height" MinHeight="120"
+        Title="Claude Account Switcher" Width="352" SizeToContent="Height" MinHeight="152"
         WindowStartupLocation="CenterOwner" WindowStyle="None" ResizeMode="NoResize"
-        ShowInTaskbar="False"
-        Background="{StaticResource TitleBarBackgroundBrush}">
+        ShowInTaskbar="False" AllowsTransparency="True"
+        Background="Transparent">
     <Shell:WindowChrome.WindowChrome>
-        <Shell:WindowChrome CaptionHeight="0" GlassFrameThickness="0" CornerRadius="8" />
+        <Shell:WindowChrome CaptionHeight="0" GlassFrameThickness="0" CornerRadius="0" />
     </Shell:WindowChrome.WindowChrome>
-    <Border BorderBrush="{StaticResource AppForegroundBrush}" BorderThickness="2" CornerRadius="8">
+    <Border Margin="16" Background="{StaticResource TitleBarBackgroundBrush}" BorderBrush="{StaticResource AppForegroundBrush}" BorderThickness="2" CornerRadius="8">
+    <Border.Effect>
+        <DropShadowEffect Color="Black" Opacity="0.3" BlurRadius="24" ShadowDepth="6" Direction="270" />
+    </Border.Effect>
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <local:ThemedTitleBar x:Name="TitleBar" Grid.Row="0" />
+            <local:ThemedTitleBar x:Name="TitleBar" Grid.Row="0" CornerRadius="6,6,0,0" />
 
             <StackPanel Grid.Row="1" Margin="18">
                 <TextBlock x:Name="MessageText" FontSize="12" TextWrapping="Wrap"
